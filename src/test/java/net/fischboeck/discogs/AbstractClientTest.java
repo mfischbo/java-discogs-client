@@ -16,14 +16,35 @@
 
 package net.fischboeck.discogs;
 
+import java.io.IOException;
+import java.util.Properties;
+
 import org.junit.Before;
 
 public class AbstractClientTest {
 
+	protected String testUsername;
+	protected String testAuthToken;
+	
 	protected DatabaseOperations dbOps;
+	protected UserCollectionOperations userCollectionOps;
+
+	public AbstractClientTest() {
+		try {
+			Properties testProps = new Properties();
+			testProps.load(this.getClass().getResourceAsStream("/test.properties"));
+			
+			this.testUsername = testProps.getProperty("test.username");
+			this.testAuthToken = testProps.getProperty("test.authToken");
+		} catch (IOException ex) {
+			System.err.println("Unable to read src/test/resources/test.properties");
+		}
+	}
 	
 	@Before
 	public void setup() {
-		this.dbOps= new DiscogsClient().getDatabaseOperations();
+		DiscogsClient client = new DiscogsClient(testAuthToken);
+		this.dbOps = client.getDatabaseOperations();
+		this.userCollectionOps = client.getUserCollectionOperations();
 	}
 }

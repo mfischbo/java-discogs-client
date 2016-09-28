@@ -14,35 +14,32 @@
 //  limitations under the License.
 //
 
-package net.fischboeck.discogs.model.release;
-
-import java.util.List;
+package net.fischboeck.discogs.model.collection;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Format {
+public class Folder {
 
-	private List<String> descriptions;
+	private long id;
+	private int count;
 	private String name;
 	
-	@JsonProperty("qty")
-	private String quantity;
+	@JsonProperty("resource_url")
+	private String resourceUrl;
+		
+	public long getId() {
+		return id;
+	}
 
-	private String text;
-	
-	public List<String> getDescriptions() {
-		return descriptions;
+	public int getCount() {
+		return count;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public String getQuantity() {
-		return quantity;
-	}
-
-	public String getText() {
-		return text;
+	public String getResourceUrl() {
+		return resourceUrl;
 	}
 }

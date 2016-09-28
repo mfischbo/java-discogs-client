@@ -58,11 +58,7 @@ final public class DatabaseOperations extends BaseOperations {
 	 * @throws ClientException On any communications error
 	 */
 	public Release getRelease(long id) throws ClientException {
-		
-		StringBuilder urlBuilder = new StringBuilder(DEFAULT_BASE_URL)
-			.append("/releases/")
-			.append(id);
-		return doRequest(urlBuilder.toString(), Release.class);
+		return doRequest(fromTokens("/releases/", id), Release.class);
 	}
 
 	
@@ -80,12 +76,7 @@ final public class DatabaseOperations extends BaseOperations {
 			return getRelease(id);
 		}
 		
-		StringBuilder urlBuilder = new StringBuilder(DEFAULT_BASE_URL)
-			.append("/releases/")
-			.append(id)
-			.append("?curr_abbr=")
-			.append(currency);
-		return doRequest(urlBuilder.toString(), Release.class);
+		return doRequest(fromTokens("/releases/", id, "?curr_abbr=", currency), Release.class);
 	}
 
 	/**
@@ -97,16 +88,9 @@ final public class DatabaseOperations extends BaseOperations {
 	 */
 	public Page<Version> getMasterReleaseVersions(long id, PageRequest page) throws ClientException {
 		
-		StringBuilder urlBuilder = new StringBuilder(DEFAULT_BASE_URL)
-			.append("/masters/")
-			.append(id)
-			.append("/versions");
-		
-		urlBuilder = createPageParameters(urlBuilder, page);
-		
 		JavaType t = mapper.getTypeFactory()
 			.constructParametricType(Page.class, Version.class);
-		Page<Version> retval = doRequest(urlBuilder.toString(), t);
+		Page<Version> retval = doRequest(fromTokensAndPage(page, "/masters/", id, "/versions"), t);
 		return retval;
 	}
 
@@ -119,14 +103,9 @@ final public class DatabaseOperations extends BaseOperations {
 	 * @throws ClientException
 	 */
 	public UserReleaseRating getUserReleaseRating(long releaseId, String username) throws ClientException {
-		
-		StringBuilder uriBuilder = new StringBuilder(DEFAULT_BASE_URL)
-			.append("/releases/")
-			.append(releaseId)
-			.append("/rating/")
-			.append(username);
-		
-		return doRequest(uriBuilder.toString(), UserReleaseRating.class);
+	
+		return doRequest(fromTokens("/releases/", releaseId, "/rating/", username), 
+				UserReleaseRating.class);
 	}
 	
 	
@@ -170,12 +149,8 @@ final public class DatabaseOperations extends BaseOperations {
 	 */
 	public CommunityRating getCommunityReleaseRating(long releaseId) throws ClientException {
 		
-		StringBuilder uriBuilder = new StringBuilder(DEFAULT_BASE_URL)
-			.append("/releases/")
-			.append(releaseId)
-			.append("/rating");
-		
-		return doRequest(uriBuilder.toString(), CommunityRating.class);
+		return doRequest(fromTokens("/releases/", releaseId, "/rating"), 
+				CommunityRating.class);
 	}
 	
 
@@ -187,10 +162,7 @@ final public class DatabaseOperations extends BaseOperations {
 	 */
 	public Artist getArtist(long id) throws ClientException {
 		
-		StringBuilder uriBuilder = new StringBuilder(DEFAULT_BASE_URL)
-			.append("/artists/")
-			.append(id);
-		return doRequest(uriBuilder.toString(), Artist.class);
+		return doRequest(fromTokens("/artists/", id), Artist.class);
 	}
 
 	
@@ -203,16 +175,10 @@ final public class DatabaseOperations extends BaseOperations {
 	 */
 	public Page<SimpleRelease> getArtistReleases(long artistId, PageRequest page) throws ClientException {
 
-		StringBuilder uriBuilder = new StringBuilder(DEFAULT_BASE_URL)
-			.append("/artists/")
-			.append(artistId)
-			.append("/releases");
-
-		uriBuilder = createPageParameters(uriBuilder, page);
-		
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(Page.class, SimpleRelease.class);
-		return doRequest(uriBuilder.toString(), t);
+		return doRequest(fromTokensAndPage(page, "/artists/", 
+				artistId, "/releases"), t);
 	}
 	
 
@@ -224,11 +190,7 @@ final public class DatabaseOperations extends BaseOperations {
 	 */
 	public Label getLabel(long id) throws ClientException {
 		
-		StringBuilder b = new StringBuilder(DEFAULT_BASE_URL)
-			.append("/labels/")
-			.append(id);
-		
-		return doRequest(b.toString(), Label.class);
+		return doRequest(fromTokens("/labels/", id), Label.class);
 	}
 	
 
@@ -241,16 +203,9 @@ final public class DatabaseOperations extends BaseOperations {
 	 */
 	public Page<SimpleRelease> getLabelReleases(long labelId, PageRequest page) throws ClientException {
 		
-		StringBuilder uriBuilder = new StringBuilder(DEFAULT_BASE_URL)
-			.append("/labels/")
-			.append(labelId)
-			.append("/releases");
-		
-		uriBuilder = createPageParameters(uriBuilder, page);
-		
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(Page.class, SimpleRelease.class);
-		return doRequest(uriBuilder.toString(), t);
+		return doRequest(fromTokensAndPage(page, "/labels/", labelId, "/releases"), t);
 	}
 
 
