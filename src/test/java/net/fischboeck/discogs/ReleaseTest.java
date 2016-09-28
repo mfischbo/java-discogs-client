@@ -18,7 +18,7 @@ package net.fischboeck.discogs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import net.fischboeck.discogs.DiscogsClient.Currency;
+import net.fischboeck.discogs.DatabaseOperations.Currency;
 import net.fischboeck.discogs.model.release.CommunityRating;
 import net.fischboeck.discogs.model.release.Release;
 import net.fischboeck.discogs.model.release.UserReleaseRating;
@@ -30,7 +30,7 @@ public class ReleaseTest extends AbstractClientTest {
 	@Test
 	public void canRetrieveRelease() throws Exception {
 		
-		Release r = client.getRelease(28813);
+		Release r = dbOps.getRelease(28813);
 		assertNotNull(r);
 	}
 	
@@ -38,14 +38,14 @@ public class ReleaseTest extends AbstractClientTest {
 	@Test
 	public void canRetrieveReleaseWithCurrency() throws Exception {
 		
-		Release r = client.getRelease(28813, Currency.EUR);
+		Release r = dbOps.getRelease(28813, Currency.EUR);
 		assertNotNull(r);
 	}
 	
 	@Test
 	public void canRetrieveCommunityRating() throws Exception {
 		
-		CommunityRating rating = client.getCommunityReleaseRating(335195);
+		CommunityRating rating = dbOps.getCommunityReleaseRating(335195);
 		assertNotNull(rating);
 		assertEquals(335195, rating.getReleaseId());
 	}
@@ -54,7 +54,7 @@ public class ReleaseTest extends AbstractClientTest {
 	@Test
 	public void canRetrieveUserReleaseRating() throws Exception {
 		
-		UserReleaseRating rating = client.getUserReleaseRating(335195, "a.paul");
+		UserReleaseRating rating = dbOps.getUserReleaseRating(335195, "a.paul");
 		assertNotNull(rating);
 		assertEquals(335195, rating.getReleaseId());
 		assertEquals("a.paul", rating.getUsername());

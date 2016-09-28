@@ -16,8 +16,7 @@
 
 package net.fischboeck.discogs;
 
-
-import net.fischboeck.discogs.DiscogsClient.QueryParam;
+import net.fischboeck.discogs.DatabaseOperations.QueryParam;
 
 import org.junit.Test;
 
@@ -26,12 +25,12 @@ public class SearchTest extends AbstractClientTest {
 	@Test(expected = IllegalStateException.class)
 	public void failsSearchOnUnauthenticatedClient() throws Exception {
 		
-		client.search("Pete Rock", null, QueryParam.artist);
+		dbOps.search("Pete Rock", null, QueryParam.artist);
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void failsOnMissingQueryString() throws Exception {
 		
-		client.search(null, null, QueryParam.artist);
+		dbOps.search(null, null, QueryParam.artist);
 	}
 }

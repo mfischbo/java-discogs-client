@@ -29,14 +29,14 @@ public class MasterReleaseTest extends AbstractClientTest {
 	@Test
 	public void canReadMasterRelease() throws Exception {
 	
-		MasterRelease r = this.client.getMasterRelease(28351);
+		MasterRelease r = this.dbOps.getMasterRelease(28351);
 		assertNotNull(r);
 	}
 	
 	@Test
 	public void canRetrieveMasterReleaseVersions() throws Exception {
 		
-		Page<Version> page = this.client.getMasterReleaseVersions(1000, null);
+		Page<Version> page = this.dbOps.getMasterReleaseVersions(1000, null);
 		assertNotNull(page);
 		assertNotNull(page.getContent());
 		assertTrue(page.getContent().size() > 0);

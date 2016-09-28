@@ -20,10 +20,10 @@ import org.junit.Before;
 
 public class AbstractClientTest {
 
-	protected DiscogsClient client;
+	protected DatabaseOperations dbOps;
 	
 	@Before
 	public void setup() {
-		this.client = new DiscogsClient();
+		this.dbOps= new DiscogsClient().getDatabaseOperations();
 	}
 }

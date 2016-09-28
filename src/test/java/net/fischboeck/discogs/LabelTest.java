@@ -29,19 +29,19 @@ public class LabelTest extends AbstractClientTest {
 
 	@Test
 	public void canRetrieveLabels() throws Exception {
-		Label label = client.getLabel(141);
+		Label label = dbOps.getLabel(141);
 		assertNotNull(label);
 	}
 	
 	@Test
 	public void returnsNullOnLabelNotFound() throws Exception {
-		Label label = client.getLabel(-1);
+		Label label = dbOps.getLabel(-1);
 		assertNull(label);
 	}
 	
 	@Test
 	public void canRetrieveLabelReleases() throws Exception {
-		Page<SimpleRelease> releases = client.getLabelReleases(141, null);
+		Page<SimpleRelease> releases = dbOps.getLabelReleases(141, null);
 		assertNotNull(releases);
 		assertNotNull(releases.getContent());
 		assertTrue(releases.getContent().size() > 0);

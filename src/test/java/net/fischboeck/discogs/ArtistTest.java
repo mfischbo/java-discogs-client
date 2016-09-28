@@ -30,21 +30,21 @@ public class ArtistTest extends AbstractClientTest {
 	@Test
 	public void canRetrieveArtist() throws Exception {
 
-		Artist a = client.getArtist(22212);
+		Artist a = dbOps.getArtist(22212);
 		assertNotNull(a);
 	}
 	
 	@Test
 	public void returnsNullOnArtistNotFound() throws Exception {
 		
-		Artist a = client.getArtist(-1);
+		Artist a = dbOps.getArtist(-1);
 		assertEquals(null, a);
 	}
 	
 	@Test
 	public void canRetrieveArtistReleases() throws Exception {
 		
-		Page<SimpleRelease> releases = client.getArtistReleases(22212, null);
+		Page<SimpleRelease> releases = dbOps.getArtistReleases(22212, null);
 		assertNotNull(releases);
 		assertNotNull(releases.getContent());
 		assertTrue(releases.getContent().size() > 0);
