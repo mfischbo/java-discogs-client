@@ -16,11 +16,14 @@
 
 package net.fischboeck.discogs;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Iterator;
 import java.util.List;
 
+import net.fischboeck.discogs.commands.CreateFolderCommand;
 import net.fischboeck.discogs.model.Page;
 import net.fischboeck.discogs.model.collection.CollectionRelease;
 import net.fischboeck.discogs.model.collection.CollectionValue;
@@ -44,6 +47,37 @@ public class FolderCollectionTest extends AbstractClientTest {
 		assertNotNull(f);
 		assertTrue(f.getId() == 0);
 	}
+	
+	
+	@Test
+	public void canCreateFolderByUsername() throws Exception {
+
+		CreateFolderCommand cf = new CreateFolderCommand("test-folder");
+		Folder f = this.userCollectionOps.createFolder(testUsername, cf);
+		
+		assertNotNull(f);
+		assertEquals(f.getName(), cf.getName());
+	}
+	
+	
+	@Test
+	public void canDeleteFolderByUsernameAndId() throws Exception {
+		
+		List<Folder> folders = this.userCollectionOps.getFoldersByUser(testUsername);
+		assertTrue(folders.size() > 2);
+		
+		// find the first folder that does not have id 0 or 1
+		Iterator<Folder> fit = folders.iterator();
+		while (fit.hasNext()) {
+			Folder f = fit.next();
+			if (f.getId() == 0L || f.getId() == 1L)
+				fit.remove();
+		}
+		
+		Folder f = folders.get(0);
+		this.userCollectionOps.deleteFolder(testUsername, f.getId());
+	}
+	
 	
 	@Test
 	public void canAccessReleasesByFolderIdAndUsername() throws Exception {

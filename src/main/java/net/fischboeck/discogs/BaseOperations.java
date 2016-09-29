@@ -20,17 +20,21 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,8 +50,6 @@ class BaseOperations {
 	
 	protected boolean isAuthenticatedClient;
 	
-	private String authenticationToken;
-
 	
 	BaseOperations(CloseableHttpClient client, ObjectMapper mapper) {
 		this.httpClient = client;
@@ -73,15 +75,16 @@ class BaseOperations {
 		}
 		return urlBuilder;
 	}
+
 	
-	protected <T> T doRequest(String url, Class<T> type) throws ClientException {
+	protected <T> T doGetRequest(String url, Class<T> type) throws ClientException {
 		
 		log.debug("[doRequest] Requesting URL {}", url);
 		
 		CloseableHttpResponse response = null;
 		
 		try {
-			response = doHttpRequest(url);
+			response = doHttpRequest(new HttpGet(url));
 			HttpEntity entity = response.getEntity();
 		
 			BufferedInputStream in2 = new BufferedInputStream(entity.getContent());
@@ -102,14 +105,14 @@ class BaseOperations {
 	}
 	
 	
-	protected <T> T doRequest(String url, JavaType type) throws ClientException {
+	protected <T> T doGetRequest(String url, JavaType type) throws ClientException {
 	
-		log.debug("[doRequest] Requesting URL {}", url);
+		log.debug("[doGetRequest] Requesting URL {}", url);
 		
 		CloseableHttpResponse response = null;
 		
 		try {
-			response = doHttpRequest(url);
+			response = doHttpRequest(new HttpGet(url));
 			HttpEntity entity = response.getEntity();
 			
 			BufferedInputStream in2 = new BufferedInputStream(entity.getContent());
@@ -130,10 +133,52 @@ class BaseOperations {
 	}
 	
 	
-	protected CloseableHttpResponse doHttpRequest(String url) throws EntityNotFoundException, ClientException {
+	protected <T> T doPostRequest(String url, Object body, Class<T> type) throws ClientException {
 		
-		HttpGet request = new HttpGet(url);
-		request.addHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
+		log.debug("[doPostRequest] url={}", url);
+		
+		CloseableHttpResponse response = null;
+
+		try {
+			HttpPost request = new HttpPost(url);
+			request.setEntity(new ByteArrayEntity(
+					mapper.writeValueAsBytes(body), ContentType.APPLICATION_JSON));
+			
+			response = doHttpRequest(request);
+			HttpEntity entity = response.getEntity();
+			T retval = mapper.readValue(entity.getContent(), type);
+			return retval;
+		} catch (JsonProcessingException jpe) {
+			throw new ClientException(jpe.getMessage());
+		} catch (IOException ioe) {
+			throw new ClientException(ioe.getMessage());
+		} catch (EntityNotFoundException enfe) {
+			return null;
+		} finally {
+			closeSafe(response);
+		}
+	}
+	
+	
+	protected void doDeleteRequest(String url) {
+		log.debug("[doDeleteRequest] url={}", url);
+		
+		CloseableHttpResponse response = null;
+		
+		try {
+			HttpDelete request = new HttpDelete(url);
+			response = doHttpRequest(request);
+		} catch (EntityNotFoundException enfe) {
+			
+		} catch (ClientException ce) {
+			
+		} finally {
+			closeSafe(response);
+		}
+	}
+	
+	
+	protected CloseableHttpResponse doHttpRequest(HttpUriRequest request) throws EntityNotFoundException, ClientException {
 		
 		CloseableHttpResponse response = null;
 		
@@ -142,7 +187,7 @@ class BaseOperations {
 			
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
 				response.close();
-				throw new EntityNotFoundException("API returned 404 on request GET " + url);
+				throw new EntityNotFoundException("API returned 404 on request GET " + request.getURI());
 			}
 			
 			return response;

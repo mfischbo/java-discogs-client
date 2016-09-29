@@ -48,7 +48,7 @@ final public class DatabaseOperations extends BaseOperations {
 		StringBuilder urlBuilder = new StringBuilder(DEFAULT_BASE_URL)
 			.append("/masters/")
 			.append(id);
-		return doRequest(urlBuilder.toString(), MasterRelease.class);
+		return doGetRequest(urlBuilder.toString(), MasterRelease.class);
 	}
 
 	/**
@@ -58,7 +58,7 @@ final public class DatabaseOperations extends BaseOperations {
 	 * @throws ClientException On any communications error
 	 */
 	public Release getRelease(long id) throws ClientException {
-		return doRequest(fromTokens("/releases/", id), Release.class);
+		return doGetRequest(fromTokens("/releases/", id), Release.class);
 	}
 
 	
@@ -76,7 +76,7 @@ final public class DatabaseOperations extends BaseOperations {
 			return getRelease(id);
 		}
 		
-		return doRequest(fromTokens("/releases/", id, "?curr_abbr=", currency), Release.class);
+		return doGetRequest(fromTokens("/releases/", id, "?curr_abbr=", currency), Release.class);
 	}
 
 	/**
@@ -90,7 +90,7 @@ final public class DatabaseOperations extends BaseOperations {
 		
 		JavaType t = mapper.getTypeFactory()
 			.constructParametricType(Page.class, Version.class);
-		Page<Version> retval = doRequest(fromTokensAndPage(page, "/masters/", id, "/versions"), t);
+		Page<Version> retval = doGetRequest(fromTokensAndPage(page, "/masters/", id, "/versions"), t);
 		return retval;
 	}
 
@@ -104,7 +104,7 @@ final public class DatabaseOperations extends BaseOperations {
 	 */
 	public UserReleaseRating getUserReleaseRating(long releaseId, String username) throws ClientException {
 	
-		return doRequest(fromTokens("/releases/", releaseId, "/rating/", username), 
+		return doGetRequest(fromTokens("/releases/", releaseId, "/rating/", username), 
 				UserReleaseRating.class);
 	}
 	
@@ -149,7 +149,7 @@ final public class DatabaseOperations extends BaseOperations {
 	 */
 	public CommunityRating getCommunityReleaseRating(long releaseId) throws ClientException {
 		
-		return doRequest(fromTokens("/releases/", releaseId, "/rating"), 
+		return doGetRequest(fromTokens("/releases/", releaseId, "/rating"), 
 				CommunityRating.class);
 	}
 	
@@ -162,7 +162,7 @@ final public class DatabaseOperations extends BaseOperations {
 	 */
 	public Artist getArtist(long id) throws ClientException {
 		
-		return doRequest(fromTokens("/artists/", id), Artist.class);
+		return doGetRequest(fromTokens("/artists/", id), Artist.class);
 	}
 
 	
@@ -177,7 +177,7 @@ final public class DatabaseOperations extends BaseOperations {
 
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(Page.class, SimpleRelease.class);
-		return doRequest(fromTokensAndPage(page, "/artists/", 
+		return doGetRequest(fromTokensAndPage(page, "/artists/", 
 				artistId, "/releases"), t);
 	}
 	
@@ -190,7 +190,7 @@ final public class DatabaseOperations extends BaseOperations {
 	 */
 	public Label getLabel(long id) throws ClientException {
 		
-		return doRequest(fromTokens("/labels/", id), Label.class);
+		return doGetRequest(fromTokens("/labels/", id), Label.class);
 	}
 	
 
@@ -205,7 +205,7 @@ final public class DatabaseOperations extends BaseOperations {
 		
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(Page.class, SimpleRelease.class);
-		return doRequest(fromTokensAndPage(page, "/labels/", labelId, "/releases"), t);
+		return doGetRequest(fromTokensAndPage(page, "/labels/", labelId, "/releases"), t);
 	}
 
 
@@ -250,7 +250,7 @@ final public class DatabaseOperations extends BaseOperations {
 			uriBuilder.deleteCharAt(uriBuilder.length()-1);
 		}
 	
-		SearchResult retval = doRequest(uriBuilder.toString(), SearchResult.class);
+		SearchResult retval = doGetRequest(uriBuilder.toString(), SearchResult.class);
 		return retval;
 	}
 }

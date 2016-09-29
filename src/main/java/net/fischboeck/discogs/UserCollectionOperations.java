@@ -18,6 +18,7 @@ package net.fischboeck.discogs;
 
 import java.util.List;
 
+import net.fischboeck.discogs.commands.CreateFolderCommand;
 import net.fischboeck.discogs.model.NamedCollection;
 import net.fischboeck.discogs.model.Page;
 import net.fischboeck.discogs.model.collection.CollectionRelease;
@@ -42,15 +43,28 @@ public class UserCollectionOperations extends BaseOperations {
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(NamedCollection.class, Folder.class);
 		
-		NamedCollection<Folder> retval = doRequest(
+		NamedCollection<Folder> retval = doGetRequest(
 				fromTokens("/users/", username, "/collection/folders"), t);
 		return retval.getContent();
+	}
+
+	
+	public Folder createFolder(String username, CreateFolderCommand command) throws ClientException {
+
+		return doPostRequest(fromTokens("/users/", username, "/collection/folders"),
+				command, Folder.class);
+	}
+	
+	
+	public void deleteFolder(String username, long folderId) throws ClientException {
+		
+		doDeleteRequest(fromTokens("/users/", username, "/collection/folders/", folderId));
 	}
 	
 	
 	public Folder getFolderByUsernameAndId(String username, long id, PageRequest page) throws ClientException {
 		
-		return doRequest(
+		return doGetRequest(
 				fromTokens("/users/", username, "/collection/folders/", id),
 				Folder.class);
 	}
@@ -60,7 +74,7 @@ public class UserCollectionOperations extends BaseOperations {
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(Page.class, CollectionRelease.class);
 		
-		return doRequest(
+		return doGetRequest(
 				fromTokens("/users/", username, "/collection/releases/", releaseId), t);
 	}
 	
@@ -69,13 +83,13 @@ public class UserCollectionOperations extends BaseOperations {
 		
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(Page.class, CollectionRelease.class);
-		return doRequest(
+		return doGetRequest(
 				fromTokensAndPage(page, "/users/", username, "/collection/folders/", folderId, "/releases"), t);
 	}
 	
 	public CollectionValue getCollectionValue(String username) throws ClientException {
 		
-		return doRequest(fromTokens("/users/", username, "/collection/value"),
+		return doGetRequest(fromTokens("/users/", username, "/collection/value"),
 				CollectionValue.class);
 	}
 }
