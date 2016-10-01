@@ -1,5 +1,6 @@
 package net.fischboeck.discogs;
 
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -206,6 +207,12 @@ final public class DatabaseOperations extends BaseOperations {
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(Page.class, SimpleRelease.class);
 		return doGetRequest(fromTokensAndPage(page, "/labels/", labelId, "/releases"), t);
+	}
+	
+	
+	public InputStream getImage(String url) {
+	
+		return doImageRequest(url);
 	}
 
 

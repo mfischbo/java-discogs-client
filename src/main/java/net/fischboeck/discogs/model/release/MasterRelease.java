@@ -66,6 +66,8 @@ public class MasterRelease {
 
 	@JsonProperty("data_quality")
 	private String dataQuality;
+	
+	private String notes;
 
 	public long getId() {
 		return id;
@@ -133,6 +135,10 @@ public class MasterRelease {
 
 	public String getDataQuality() {
 		return dataQuality;
+	}
+	
+	public String getNotes() {
+		return notes;
 	}
 
 	@Override

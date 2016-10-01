@@ -18,8 +18,10 @@ package net.fischboeck.discogs;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -197,6 +199,20 @@ class BaseOperations {
 		} catch (IOException ioe) {
 			throw new ClientException(ioe.getMessage());
 		}
+	}
+	
+	
+	protected InputStream doImageRequest(String url) {
+		
+		HttpGet request = new HttpGet(url);
+		request.addHeader(HttpHeaders.ACCEPT, "image/png,image/jpeg");
+		try {
+			CloseableHttpResponse response = this.httpClient.execute(request);
+			return response.getEntity().getContent();
+		} catch (Exception ex) {
+			
+		}
+		return null;
 	}
 
 	

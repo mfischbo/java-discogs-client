@@ -41,6 +41,8 @@ public class Track {
 
 	@JsonProperty("extraartists")
 	private List<ReleaseArtist> extraArtists;
+	
+	private List<ReleaseArtist> artists;
 
 	/**
 	 * Returns the duration of the track in the notation "mm:ss"
@@ -74,6 +76,11 @@ public class Track {
 	 */
 	public String getTitle() {
 		return title;
+	}
+	
+
+	public List<ReleaseArtist> getArtists() {
+		return artists;
 	}
 
 	/*
