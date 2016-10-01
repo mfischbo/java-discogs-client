@@ -20,6 +20,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.fischboeck.discogs.security.OAuthFlow;
+import net.fischboeck.discogs.security.OAuthCredentials;
+import net.fischboeck.discogs.security.OAuthVector;
+
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.ContentType;
@@ -37,10 +41,17 @@ public class DiscogsClient {
 	private CloseableHttpClient httpClient;
 	private ObjectMapper mapper;
 	
+	// The token for token authentication
 	private String authToken;
+	
+	// Username and password authentication
 	private String authUsername;
 	private String authPassword;
 	
+	// OAuth 1.0a Authentication
+	private OAuthCredentials credentials;
+
+	// api operations
 	private DatabaseOperations dbOps;
 	private UserCollectionOperations userCollectionOps;
 
@@ -68,6 +79,16 @@ public class DiscogsClient {
 	public DiscogsClient(String username, String password) {
 		this.authUsername = username;
 		this.authPassword = password;
+		init();
+	}
+	
+	
+	/**
+	 * Creates a new authenticated client using the OAuth authentication mechanism
+	 * @param credentials The credentials from a previous authentication
+	 */
+	public DiscogsClient(OAuthCredentials credentials) {
+		this.credentials = credentials;
 		init();
 	}
 
@@ -105,6 +126,11 @@ public class DiscogsClient {
 			defaultHeaders.add(h);
 		}
 		
+		// otherwise we use oauth authentication
+		if (this.credentials != null) {
+			// ja ... well ... great documentation there
+		}
+		
 		return defaultHeaders;
 	}
 
@@ -128,5 +154,15 @@ public class DiscogsClient {
 			userCollectionOps = new UserCollectionOperations(httpClient, mapper);
 		}
 		return userCollectionOps;
+	}
+	
+
+	/**
+	 * Returns a client to establish an OAuth authorization with discogs
+	 * @param vector The applications consumer key and consumer secret
+	 * @return The DiscogsOAuthFlow to create an authentication
+	 */
+	public OAuthFlow getOAuthFlow(OAuthVector vector) {
+		return new OAuthFlow(this.httpClient, vector);
 	}
 }
