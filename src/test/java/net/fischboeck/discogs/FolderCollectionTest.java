@@ -22,8 +22,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import net.fischboeck.discogs.commands.CreateFolderCommand;
+import net.fischboeck.discogs.commands.UpdateFolderCommand;
 import net.fischboeck.discogs.model.Page;
 import net.fischboeck.discogs.model.collection.CollectionRelease;
 import net.fischboeck.discogs.model.collection.CollectionValue;
@@ -33,6 +35,8 @@ import org.junit.Test;
 
 public class FolderCollectionTest extends AbstractClientTest {
 
+	static final long UPDATE_LIST_ID = 929495;
+	
 	@Test
 	public void canAccessUserCollections() throws Exception {
 		List<Folder> fc = this.userCollectionOps.getFoldersByUser(testUsername);
@@ -43,7 +47,7 @@ public class FolderCollectionTest extends AbstractClientTest {
 	@Test
 	public void canAccessFolderByUsernameAndId() throws Exception {
 		
-		Folder f = this.userCollectionOps.getFolderByUsernameAndId(testUsername, 0, null);
+		Folder f = this.userCollectionOps.getFolderByUsernameAndId(testUsername, 0);
 		assertNotNull(f);
 		assertTrue(f.getId() == 0);
 	}
@@ -58,6 +62,17 @@ public class FolderCollectionTest extends AbstractClientTest {
 		assertNotNull(f);
 		assertEquals(f.getName(), cf.getName());
 	}
+
+	@Test
+	public void canUpdateFolderByUsername() throws Exception {
+		
+		String randomName = UUID.randomUUID().toString();
+		
+		UpdateFolderCommand uc = new UpdateFolderCommand(UPDATE_LIST_ID, randomName);
+		Folder f = this.userCollectionOps.updateFolder(testUsername, uc);
+		assertNotNull(f);
+		assertEquals(randomName, f.getName());
+	}
 	
 	
 	@Test
@@ -66,11 +81,11 @@ public class FolderCollectionTest extends AbstractClientTest {
 		List<Folder> folders = this.userCollectionOps.getFoldersByUser(testUsername);
 		assertTrue(folders.size() > 2);
 		
-		// find the first folder that does not have id 0 or 1
+		// find the first folder that does not have id 0 or 1 or UPDATE_LIST_ID
 		Iterator<Folder> fit = folders.iterator();
 		while (fit.hasNext()) {
 			Folder f = fit.next();
-			if (f.getId() == 0L || f.getId() == 1L)
+			if (f.getId() == 0L || f.getId() == 1L || f.getId() != UPDATE_LIST_ID)
 				fit.remove();
 		}
 		

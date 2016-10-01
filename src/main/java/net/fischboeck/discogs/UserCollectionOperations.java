@@ -19,6 +19,7 @@ package net.fischboeck.discogs;
 import java.util.List;
 
 import net.fischboeck.discogs.commands.CreateFolderCommand;
+import net.fischboeck.discogs.commands.UpdateFolderCommand;
 import net.fischboeck.discogs.model.NamedCollection;
 import net.fischboeck.discogs.model.Page;
 import net.fischboeck.discogs.model.collection.CollectionRelease;
@@ -32,12 +33,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class UserCollectionOperations extends BaseOperations {
 
-	
+
+	/**
+	 * Creates a new UserCollectionOperation using the provided client and mapper
+	 * @param client The {@link CloseableHttpClient} to be used for requests
+	 * @param mapper The {@link ObjectMapper} to de-/serialize data
+	 */
 	UserCollectionOperations(CloseableHttpClient client, ObjectMapper mapper) {
 		super(client, mapper);
 	}
 
-	
+
+	/**
+	 * Returns all folders for the given username
+	 * @param username The username to return the folders for
+	 * @return List containing {@link Folder}s
+	 * @throws ClientException
+	 */
 	public List<Folder> getFoldersByUser(String username) throws ClientException {
 		
 		JavaType t = mapper.getTypeFactory()
@@ -49,6 +61,13 @@ public class UserCollectionOperations extends BaseOperations {
 	}
 
 	
+	/**
+	 * Creates a new folder for the given username
+	 * @param username The username to create the folder for
+	 * @param command The command to create a new folder
+	 * @return The folder that has been created
+	 * @throws ClientException
+	 */
 	public Folder createFolder(String username, CreateFolderCommand command) throws ClientException {
 
 		return doPostRequest(fromTokens("/users/", username, "/collection/folders"),
@@ -56,19 +75,54 @@ public class UserCollectionOperations extends BaseOperations {
 	}
 	
 	
+	/**
+	 * Updates a folder or more specifically the folders name
+	 * @param username The name of the user that owns the folder
+	 * @param command The command to update the folder
+	 * @return The updated folder
+	 * @throws ClientException
+	 */
+	public Folder updateFolder(String username, UpdateFolderCommand command) throws ClientException {
+		
+		return doPostRequest(fromTokens("/users/", username, "/collection/folders/", command.getId()),
+				command, Folder.class);
+	}
+	
+	
+	/**
+	 * Deletes a folder
+	 * @param username The name of the user owning the specified folder
+	 * @param folderId The id of the folder to be removed
+	 * @throws ClientException
+	 */
 	public void deleteFolder(String username, long folderId) throws ClientException {
 		
 		doDeleteRequest(fromTokens("/users/", username, "/collection/folders/", folderId));
 	}
 	
 	
-	public Folder getFolderByUsernameAndId(String username, long id, PageRequest page) throws ClientException {
+	/**
+	 * Returns a single folder given the name of the user and the id of the folder.
+	 * @param username The username who owns the folder
+	 * @param id The id of the folder to be returned
+	 * @return The folder
+	 * @throws ClientException
+	 */
+	public Folder getFolderByUsernameAndId(String username, long id) throws ClientException {
 		
 		return doGetRequest(
 				fromTokens("/users/", username, "/collection/folders/", id),
 				Folder.class);
 	}
 	
+	/**
+	 * Returns all releases for a given release id the user added to his collection.
+	 * This are the actual physical copies of the release
+	 * @param username The name of the user to retrieve {@link CollectionRelease}s for
+	 * @param releaseId The id of the release
+	 * @return A list of {@link CollectionRelease}s for the given username and id
+	 * @throws ClientException
+	 */
 	public Page<CollectionRelease> getCollectionReleasesByUsernameAndId(String username, long releaseId) throws ClientException {
 
 		JavaType t = mapper.getTypeFactory()
@@ -78,7 +132,15 @@ public class UserCollectionOperations extends BaseOperations {
 				fromTokens("/users/", username, "/collection/releases/", releaseId), t);
 	}
 	
-	
+
+	/**
+	 * Returns all {@link CollectionRelease}s for a given username and folder
+	 * @param username The name of the user
+	 * @param folderId The id of the folder holding the {@link CollectionRelease}s
+	 * @param page The paging parameters. Can be null in which case the default page parameters are used
+	 * @return A Page of {@link CollectionRelease}s
+	 * @throws ClientException
+	 */
 	public Page<CollectionRelease> getCollectionReleasesByFolderId(String username, long folderId, PageRequest page) throws ClientException {
 		
 		JavaType t = mapper.getTypeFactory()
@@ -87,6 +149,13 @@ public class UserCollectionOperations extends BaseOperations {
 				fromTokensAndPage(page, "/users/", username, "/collection/folders/", folderId, "/releases"), t);
 	}
 	
+	
+	/**
+	 * Returns the monetary value of the collection
+	 * @param username The name of the user to retrieve the collection value for
+	 * @return
+	 * @throws ClientException
+	 */
 	public CollectionValue getCollectionValue(String username) throws ClientException {
 		
 		return doGetRequest(fromTokens("/users/", username, "/collection/value"),
