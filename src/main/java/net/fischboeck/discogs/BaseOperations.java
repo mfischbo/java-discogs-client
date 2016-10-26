@@ -16,50 +16,46 @@
 
 package net.fischboeck.discogs;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.fischboeck.discogs.security.AuthorizationStrategy;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 class BaseOperations {
 
 	protected static final String DEFAULT_BASE_URL = "https://api.discogs.com";
-	
-	protected final Logger log = LoggerFactory.getLogger(getClass());
-	
-	protected CloseableHttpClient httpClient;
-	protected ObjectMapper mapper;
-	
-	protected boolean isAuthenticatedClient;
-	
-	
-	BaseOperations(CloseableHttpClient client, ObjectMapper mapper) {
+
+	protected final ObjectMapper mapper;
+
+	private CloseableHttpClient httpClient;
+
+	protected final AuthorizationStrategy authorizationStrategy;
+
+	private final Logger log = LoggerFactory.getLogger(getClass());
+
+	BaseOperations(CloseableHttpClient client, ObjectMapper mapper, AuthorizationStrategy strategy) {
 		this.httpClient = client;
 		this.mapper = mapper;
+		this.authorizationStrategy = strategy;
 	}
 	
 
-	protected StringBuilder createPageParameters(StringBuilder urlBuilder, PageRequest page) {
+	StringBuilder createPageParameters(StringBuilder urlBuilder, PageRequest page) {
 		if (page != null) {
 			urlBuilder.append("?page=");
 			
@@ -79,7 +75,7 @@ class BaseOperations {
 	}
 
 	
-	protected <T> T doGetRequest(String url, Class<T> type) throws ClientException {
+	<T> T doGetRequest(String url, Class<T> type) throws ClientException {
 		
 		log.debug("[doRequest] Requesting URL {}", url);
 		
@@ -91,8 +87,8 @@ class BaseOperations {
 		
 			BufferedInputStream in2 = new BufferedInputStream(entity.getContent());
 			
-			T retval = mapper.readValue(in2, type);
-			return retval;
+			return mapper.readValue(in2, type);
+
 		} catch (EntityNotFoundException ex) {
 			return null;
 		} catch (JsonMappingException jme) {
@@ -107,7 +103,7 @@ class BaseOperations {
 	}
 	
 	
-	protected <T> T doGetRequest(String url, JavaType type) throws ClientException {
+	<T> T doGetRequest(String url, JavaType type) throws ClientException {
 	
 		log.debug("[doGetRequest] Requesting URL {}", url);
 		
@@ -119,8 +115,7 @@ class BaseOperations {
 			
 			BufferedInputStream in2 = new BufferedInputStream(entity.getContent());
 			
-			T retval = mapper.readValue(in2, type);
-			return retval;
+			return mapper.readValue(in2, type);
 		} catch (EntityNotFoundException ex) {
 			return null;
 		} catch (JsonMappingException jme) {
@@ -135,7 +130,7 @@ class BaseOperations {
 	}
 	
 	
-	protected <T> T doPostRequest(String url, Object body, Class<T> type) throws ClientException {
+	<T> T doPostRequest(String url, Object body, Class<T> type) throws ClientException {
 		
 		log.debug("[doPostRequest] url={}", url);
 		
@@ -148,8 +143,8 @@ class BaseOperations {
 			
 			response = doHttpRequest(request);
 			HttpEntity entity = response.getEntity();
-			T retval = mapper.readValue(entity.getContent(), type);
-			return retval;
+			return mapper.readValue(entity.getContent(), type);
+
 		} catch (JsonProcessingException jpe) {
 			throw new ClientException(jpe.getMessage());
 		} catch (IOException ioe) {
@@ -162,7 +157,7 @@ class BaseOperations {
 	}
 	
 	
-	protected void doDeleteRequest(String url) {
+	void doDeleteRequest(String url) {
 		log.debug("[doDeleteRequest] url={}", url);
 		
 		CloseableHttpResponse response = null;
@@ -171,19 +166,20 @@ class BaseOperations {
 			HttpDelete request = new HttpDelete(url);
 			response = doHttpRequest(request);
 		} catch (EntityNotFoundException enfe) {
-			
+			log.error("[doDeleteRequest] DELETE {} resulted in Http Status 404", url);
 		} catch (ClientException ce) {
-			
+			log.error("[doDeleteRequest] Caught client exception. Cause: {}", ce.getMessage());
 		} finally {
 			closeSafe(response);
 		}
 	}
 	
 	
-	protected CloseableHttpResponse doHttpRequest(HttpUriRequest request) throws EntityNotFoundException, ClientException {
+	CloseableHttpResponse doHttpRequest(HttpUriRequest request) throws EntityNotFoundException, ClientException {
 		
 		CloseableHttpResponse response = null;
-		
+		request = this.authorizationStrategy.authorize(request);
+
 		try {
 			response = this.httpClient.execute(request);
 			
@@ -194,15 +190,13 @@ class BaseOperations {
 			
 			return response;
 		
-		} catch (ClientProtocolException cpe) {
-			throw new ClientException(cpe.getMessage());
-		} catch (IOException ioe) {
-			throw new ClientException(ioe.getMessage());
+		} catch (Exception ex) {
+			throw new ClientException(ex.getMessage());
 		}
 	}
 	
 	
-	protected InputStream doImageRequest(String url) {
+	InputStream doImageRequest(String url) {
 		
 		HttpGet request = new HttpGet(url);
 		request.addHeader(HttpHeaders.ACCEPT, "image/png,image/jpeg");
@@ -210,13 +204,13 @@ class BaseOperations {
 			CloseableHttpResponse response = this.httpClient.execute(request);
 			return response.getEntity().getContent();
 		} catch (Exception ex) {
-			
+			log.error("[doImageRequest] Caught exception fetching the image. Cause {}", ex.getMessage());
 		}
 		return null;
 	}
 
 	
-	private final void closeSafe(CloseableHttpResponse response) {
+	private void closeSafe(CloseableHttpResponse response) {
 		if (response != null) {
 			try {
 				response.close();
@@ -225,9 +219,9 @@ class BaseOperations {
 			}
 		}
 	}
+
 	
-	
-	protected final String fromTokens(Object... o) {
+	final String fromTokens(Object... o) {
 		StringBuilder b = new StringBuilder(DEFAULT_BASE_URL);
 		for (Object t : o) {
 			b.append(t.toString());
@@ -236,7 +230,7 @@ class BaseOperations {
 	}
 	
 	
-	protected final String fromTokensAndPage(PageRequest page, Object...objects) {
+	final String fromTokensAndPage(final PageRequest page, final Object...objects) {
 		
 		StringBuilder b = new StringBuilder(DEFAULT_BASE_URL);
 		for (Object o : objects) {
@@ -264,5 +258,4 @@ class BaseOperations {
 		
 		return b.toString();
 	}
-
 }

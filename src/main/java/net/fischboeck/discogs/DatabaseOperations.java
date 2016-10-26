@@ -1,31 +1,23 @@
 package net.fischboeck.discogs;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.fischboeck.discogs.model.Currency;
+import net.fischboeck.discogs.model.Page;
+import net.fischboeck.discogs.model.artist.Artist;
+import net.fischboeck.discogs.model.label.Label;
+import net.fischboeck.discogs.model.release.*;
+import net.fischboeck.discogs.model.search.SearchResult;
+import net.fischboeck.discogs.security.AuthorizationStrategy;
+import net.fischboeck.discogs.security.NullAuthorizationStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import net.fischboeck.discogs.model.Page;
-import net.fischboeck.discogs.model.artist.Artist;
-import net.fischboeck.discogs.model.label.Label;
-import net.fischboeck.discogs.model.release.CommunityRating;
-import net.fischboeck.discogs.model.release.MasterRelease;
-import net.fischboeck.discogs.model.release.Release;
-import net.fischboeck.discogs.model.release.SimpleRelease;
-import net.fischboeck.discogs.model.release.UserReleaseRating;
-import net.fischboeck.discogs.model.release.Version;
-import net.fischboeck.discogs.model.search.SearchResult;
-
-import org.apache.http.impl.client.CloseableHttpClient;
-
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 final public class DatabaseOperations extends BaseOperations {
 
-	public enum Currency {
-		USD, GBP, EUR, CAD, AUD, JPY, CHF, MXN, BRL, NZD, SEK, ZAR
-	}
-	
 	public enum QueryParam {
 		type, title, release_title, credit, artist, anv, label, genre,
 		style, country, year, format, catno, barcode, track, submitter,
@@ -33,8 +25,8 @@ final public class DatabaseOperations extends BaseOperations {
 	}
 	
 	
-	DatabaseOperations(CloseableHttpClient client, ObjectMapper mapper) {
-		super(client, mapper);
+	DatabaseOperations(CloseableHttpClient client, ObjectMapper mapper, AuthorizationStrategy strategy) {
+		super(client, mapper, strategy);
 	}
 
 
@@ -68,7 +60,7 @@ final public class DatabaseOperations extends BaseOperations {
 	 * @param id The id of the {@link Release} to be retrieved
 	 * @param currency The {@link Currency} to format any monetary values in. Accepts 
 	 * <code>null</code> in which this method behaves as {{@link #getRelease(long)} 
-	 * @return The {@link Relase} or <code>null</code> if no such entity exists 
+	 * @return The {@link Release} or <code>null</code> if no such entity exists
 	 * @throws ClientException On any communications error
 	 */
 	public Release getRelease(long id, Currency currency) throws ClientException {
@@ -81,7 +73,7 @@ final public class DatabaseOperations extends BaseOperations {
 	}
 
 	/**
-	 * Returns a {@link Page} of {@link Versions} for the specified id of {@link MasterRelease}
+	 * Returns a {@link Page} of {@link Version} for the specified id of {@link MasterRelease}
 	 * @param id The id of the {@link MasterRelease}
 	 * @param page The {@link PageRequest} containing paging information or <code>null</code>
 	 * @return The {@link Page} of results
@@ -112,7 +104,7 @@ final public class DatabaseOperations extends BaseOperations {
 	
 	public void updateUserReleaseRating(long releaseId, String username, int rating) throws ClientException {
 
-		if (!this.isAuthenticatedClient) {
+		if (authorizationStrategy == null || authorizationStrategy instanceof NullAuthorizationStrategy) {
 			throw new IllegalStateException("This operation requires an authenticated client.");
 		}
 		
@@ -130,7 +122,7 @@ final public class DatabaseOperations extends BaseOperations {
 	
 	public void deleteUserReleaseRating(long releaseId, String username) throws ClientException {
 		
-		if (!this.isAuthenticatedClient) {
+		if (authorizationStrategy == null || authorizationStrategy instanceof NullAuthorizationStrategy) {
 			throw new IllegalStateException("This operation requires an authenticated client");
 		}
 		
@@ -229,7 +221,7 @@ final public class DatabaseOperations extends BaseOperations {
 		if (query == null || query.isEmpty())
 			throw new IllegalArgumentException("Search query must not be null or empty");
 		
-		if (!this.isAuthenticatedClient) 
+		if (authorizationStrategy == null || authorizationStrategy instanceof  NullAuthorizationStrategy)
 			throw new IllegalStateException("This operation requires an authenticated client");
 	
 		

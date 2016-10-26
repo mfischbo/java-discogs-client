@@ -16,14 +16,11 @@
 
 package net.fischboeck.discogs;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import net.fischboeck.discogs.security.AuthorizationStrategy;
 import net.fischboeck.discogs.security.OAuthFlow;
-import net.fischboeck.discogs.security.OAuthCredentials;
 import net.fischboeck.discogs.security.OAuthVector;
-
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.ContentType;
@@ -32,28 +29,14 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DiscogsClient {
 
 	private CloseableHttpClient httpClient;
 	private ObjectMapper mapper;
-	
-	// The token for token authentication
-	private String authToken;
-	
-	// Username and password authentication
-	private String authUsername;
-	private String authPassword;
-	
-	// OAuth 1.0a Authentication
-	private OAuthCredentials credentials;
-
-	// api operations
-	private DatabaseOperations dbOps;
-	private UserCollectionOperations userCollectionOps;
 
 	/**
 	 * Creates a non authenticated client to the discogs API
@@ -62,37 +45,7 @@ public class DiscogsClient {
 		init();
 	}
 
-	/**
-	 * Creates an authenticated client to the discogs API
-	 * @param authToken The authentication token to be used for requests
-	 */
-	public DiscogsClient(String authToken) {
-		this.authToken = authToken;
-		init();
-	}
 
-	/**
-	 * Creates an authenticated client to the discogs API
-	 * @param username The username of the user that will be used
-	 * @param password The password to the provided username
-	 */
-	public DiscogsClient(String username, String password) {
-		this.authUsername = username;
-		this.authPassword = password;
-		init();
-	}
-	
-	
-	/**
-	 * Creates a new authenticated client using the OAuth authentication mechanism
-	 * @param credentials The credentials from a previous authentication
-	 */
-	public DiscogsClient(OAuthCredentials credentials) {
-		this.credentials = credentials;
-		init();
-	}
-
-	
 	private void init() {
 		HttpClientBuilder builder = HttpClients.custom();
 		this.httpClient = builder.setDefaultHeaders(this.getDefaultHeaders())
@@ -112,25 +65,6 @@ public class DiscogsClient {
 		defaultHeaders.add(
 				new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType()));
 
-		// set the auth token if provided
-		if (this.authToken != null) {
-			Header h = new BasicHeader(HttpHeaders.AUTHORIZATION, "Discogs token=" + this.authToken);
-			defaultHeaders.add(h);
-		}
-	
-		// otherwise check for username and password
-		if (this.authUsername != null && !this.authUsername.isEmpty() &&
-				this.authPassword != null && !this.authPassword.isEmpty()) {
-			String value = "Discogs key=" + this.authUsername + ", secret=" + this.authPassword;
-			Header h = new BasicHeader(HttpHeaders.AUTHORIZATION, value);
-			defaultHeaders.add(h);
-		}
-		
-		// otherwise we use oauth authentication
-		if (this.credentials != null) {
-			// ja ... well ... great documentation there
-		}
-		
 		return defaultHeaders;
 	}
 
@@ -138,24 +72,26 @@ public class DiscogsClient {
 	 * Returns a new {@link DatabaseOperations} client
 	 * @return
 	 */
-	public DatabaseOperations getDatabaseOperations() {
-		if (dbOps == null) {
-			dbOps = new DatabaseOperations(httpClient, mapper);
-		}
-		return dbOps;
+	public DatabaseOperations getDatabaseOperations(AuthorizationStrategy strategy) {
+		return new DatabaseOperations(httpClient, mapper, strategy);
 	}
 	
 	/**
 	 * Returns the {@link UserCollectionOperations} client
 	 * @return The client to access the user collection API's
 	 */
-	public UserCollectionOperations getUserCollectionOperations() {
-		if (userCollectionOps == null) {
-			userCollectionOps = new UserCollectionOperations(httpClient, mapper);
-		}
-		return userCollectionOps;
+	public UserCollectionOperations getUserCollectionOperations(AuthorizationStrategy strategy) {
+		return new UserCollectionOperations(httpClient, mapper, strategy);
 	}
-	
+
+	/**
+	 * Returns the {@link UserOperations} client
+	 * @param strategy The {@link AuthorizationStrategy} to be used to authenticate against the API
+	 * @return The client
+	 */
+	public UserOperations getUserOperations(AuthorizationStrategy strategy) {
+		return new UserOperations(httpClient, mapper, strategy);
+	}
 
 	/**
 	 * Returns a client to establish an OAuth authorization with discogs

@@ -16,14 +16,14 @@
 
 package net.fischboeck.discogs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import net.fischboeck.discogs.DatabaseOperations.Currency;
+import net.fischboeck.discogs.model.Currency;
 import net.fischboeck.discogs.model.release.CommunityRating;
 import net.fischboeck.discogs.model.release.Release;
 import net.fischboeck.discogs.model.release.UserReleaseRating;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class ReleaseTest extends AbstractClientTest {
 

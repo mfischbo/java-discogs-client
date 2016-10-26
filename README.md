@@ -15,7 +15,7 @@ https://www.discogs.com/developers/#page:user-collection
 The main entry point is the class _DiscogsClient_ that provides access to API operations as well as authentication.
 
 Example:
-```
+```java
 // Create a client without any authentication
 DisogsClient client = new DiscogsClient();
 
@@ -29,7 +29,7 @@ DiscogsClient client = new DiscogsClient(username, password);
 The different API's are accessible through _Operations_. These can be retrieved
 using the following calls:
 
-```
+```java
 // To get access to the database API
 DatabaseOperations dbOps = client.getDatabaseOperations();
 
@@ -40,7 +40,7 @@ UserCollectionOperations userOps = client.getUserCollectionOperations();
 ### OAuth authentication
 _Note: This is not fully implemented yet._
 
-```
+```java
 // Create a new OAuth flow for a given clientKey and clientSecret
 OAuthVector vector = new OAuthVector(clientKey, clientSecret);
 OAuthFlow flow = client.getOAuthFlow(vector);

@@ -16,8 +16,8 @@
 
 package net.fischboeck.discogs;
 
-import java.util.List;
-
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.fischboeck.discogs.commands.CreateFolderCommand;
 import net.fischboeck.discogs.commands.UpdateFolderCommand;
 import net.fischboeck.discogs.model.NamedCollection;
@@ -25,13 +25,15 @@ import net.fischboeck.discogs.model.Page;
 import net.fischboeck.discogs.model.collection.CollectionRelease;
 import net.fischboeck.discogs.model.collection.CollectionValue;
 import net.fischboeck.discogs.model.collection.Folder;
-
+import net.fischboeck.discogs.security.AuthorizationStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 
-public class UserCollectionOperations extends BaseOperations {
+/**
+ * Provides API access to all operations regarding a users collection.
+ */
+class UserCollectionOperations extends BaseOperations {
 
 
 	/**
@@ -39,8 +41,8 @@ public class UserCollectionOperations extends BaseOperations {
 	 * @param client The {@link CloseableHttpClient} to be used for requests
 	 * @param mapper The {@link ObjectMapper} to de-/serialize data
 	 */
-	UserCollectionOperations(CloseableHttpClient client, ObjectMapper mapper) {
-		super(client, mapper);
+	UserCollectionOperations(CloseableHttpClient client, ObjectMapper mapper, AuthorizationStrategy strategy) {
+		super(client, mapper, strategy);
 	}
 
 
@@ -48,9 +50,9 @@ public class UserCollectionOperations extends BaseOperations {
 	 * Returns all folders for the given username
 	 * @param username The username to return the folders for
 	 * @return List containing {@link Folder}s
-	 * @throws ClientException
+	 * @throws ClientException ON any communications error
 	 */
-	public List<Folder> getFoldersByUser(String username) throws ClientException {
+	List<Folder> getFoldersByUser(String username) throws ClientException {
 		
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(NamedCollection.class, Folder.class);
@@ -66,9 +68,9 @@ public class UserCollectionOperations extends BaseOperations {
 	 * @param username The username to create the folder for
 	 * @param command The command to create a new folder
 	 * @return The folder that has been created
-	 * @throws ClientException
+	 * @throws ClientException On any communications error
 	 */
-	public Folder createFolder(String username, CreateFolderCommand command) throws ClientException {
+	Folder createFolder(String username, CreateFolderCommand command) throws ClientException {
 
 		return doPostRequest(fromTokens("/users/", username, "/collection/folders"),
 				command, Folder.class);
@@ -80,9 +82,9 @@ public class UserCollectionOperations extends BaseOperations {
 	 * @param username The name of the user that owns the folder
 	 * @param command The command to update the folder
 	 * @return The updated folder
-	 * @throws ClientException
+	 * @throws ClientException On any communications error
 	 */
-	public Folder updateFolder(String username, UpdateFolderCommand command) throws ClientException {
+	Folder updateFolder(String username, UpdateFolderCommand command) throws ClientException {
 		
 		return doPostRequest(fromTokens("/users/", username, "/collection/folders/", command.getId()),
 				command, Folder.class);
@@ -93,9 +95,9 @@ public class UserCollectionOperations extends BaseOperations {
 	 * Deletes a folder
 	 * @param username The name of the user owning the specified folder
 	 * @param folderId The id of the folder to be removed
-	 * @throws ClientException
+	 * @throws ClientException On any communications error
 	 */
-	public void deleteFolder(String username, long folderId) throws ClientException {
+	void deleteFolder(String username, long folderId) throws ClientException {
 		
 		doDeleteRequest(fromTokens("/users/", username, "/collection/folders/", folderId));
 	}
@@ -106,9 +108,9 @@ public class UserCollectionOperations extends BaseOperations {
 	 * @param username The username who owns the folder
 	 * @param id The id of the folder to be returned
 	 * @return The folder
-	 * @throws ClientException
+	 * @throws ClientException On any communications error
 	 */
-	public Folder getFolderByUsernameAndId(String username, long id) throws ClientException {
+	Folder getFolderByUsernameAndId(String username, long id) throws ClientException {
 		
 		return doGetRequest(
 				fromTokens("/users/", username, "/collection/folders/", id),
@@ -121,9 +123,9 @@ public class UserCollectionOperations extends BaseOperations {
 	 * @param username The name of the user to retrieve {@link CollectionRelease}s for
 	 * @param releaseId The id of the release
 	 * @return A list of {@link CollectionRelease}s for the given username and id
-	 * @throws ClientException
+	 * @throws ClientException On any communications error
 	 */
-	public Page<CollectionRelease> getCollectionReleasesByUsernameAndId(String username, long releaseId) throws ClientException {
+	Page<CollectionRelease> getCollectionReleasesByUsernameAndId(String username, long releaseId) throws ClientException {
 
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(Page.class, CollectionRelease.class);
@@ -139,9 +141,9 @@ public class UserCollectionOperations extends BaseOperations {
 	 * @param folderId The id of the folder holding the {@link CollectionRelease}s
 	 * @param page The paging parameters. Can be null in which case the default page parameters are used
 	 * @return A Page of {@link CollectionRelease}s
-	 * @throws ClientException
+	 * @throws ClientException On any communications error
 	 */
-	public Page<CollectionRelease> getCollectionReleasesByFolderId(String username, long folderId, PageRequest page) throws ClientException {
+	Page<CollectionRelease> getCollectionReleasesByFolderId(String username, long folderId, PageRequest page) throws ClientException {
 		
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(Page.class, CollectionRelease.class);
@@ -153,10 +155,10 @@ public class UserCollectionOperations extends BaseOperations {
 	/**
 	 * Returns the monetary value of the collection
 	 * @param username The name of the user to retrieve the collection value for
-	 * @return
-	 * @throws ClientException
+	 * @return The value of the collection
+	 * @throws ClientException On any communications error
 	 */
-	public CollectionValue getCollectionValue(String username) throws ClientException {
+	CollectionValue getCollectionValue(String username) throws ClientException {
 		
 		return doGetRequest(fromTokens("/users/", username, "/collection/value"),
 				CollectionValue.class);

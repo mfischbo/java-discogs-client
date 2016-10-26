@@ -16,16 +16,20 @@
 
 package net.fischboeck.discogs;
 
+import net.fischboeck.discogs.security.AuthorizationStrategy;
+import net.fischboeck.discogs.security.TokenAuthenticationStrategy;
+import org.junit.Before;
+
 import java.io.IOException;
 import java.util.Properties;
 
-import org.junit.Before;
-
 public class AbstractClientTest {
+
+	private AuthorizationStrategy strategy;
 
 	protected String testUsername;
 	protected String testAuthToken;
-	
+
 	protected DatabaseOperations dbOps;
 	protected UserCollectionOperations userCollectionOps;
 
@@ -36,6 +40,9 @@ public class AbstractClientTest {
 			
 			this.testUsername = testProps.getProperty("test.username");
 			this.testAuthToken = testProps.getProperty("test.authToken");
+
+			this.strategy = new TokenAuthenticationStrategy(this.testAuthToken);
+
 		} catch (IOException ex) {
 			System.err.println("Unable to read src/test/resources/test.properties");
 		}
@@ -43,8 +50,8 @@ public class AbstractClientTest {
 	
 	@Before
 	public void setup() {
-		DiscogsClient client = new DiscogsClient(testAuthToken);
-		this.dbOps = client.getDatabaseOperations();
-		this.userCollectionOps = client.getUserCollectionOperations();
+		DiscogsClient client = new DiscogsClient();
+		this.dbOps = client.getDatabaseOperations(this.strategy);
+		this.userCollectionOps = client.getUserCollectionOperations(this.strategy);
 	}
 }

@@ -16,19 +16,18 @@
 
 package net.fischboeck.discogs.security;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.UUID;
-
 import net.fischboeck.discogs.ClientException;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.UUID;
 
 /**
  * This class implements a mechanism to authenticate an application agains the Discogs API
@@ -63,13 +62,24 @@ public class OAuthFlow {
 
 	private HttpClient client;
 	private OAuthVector vector;
-	
+
+	/**
+	 * Creates a new OAuth authentication flow.
+	 * @param client The HttpClient to be used for communication with the API endpoint
+	 * @param vector The client vector (e.g. consumer key and client secret)
+	 */
 	public OAuthFlow(HttpClient client, OAuthVector vector) {
 		this.vector = vector;
 		this.client = client;
 	}
 
-	
+
+	/**
+	 * Returns the authentication URL a user should be redirected to.
+	 * This usually displays a page on the discogs site where the user can authorize access to the application.
+	 * @return The OAuthCredentials that are used to authenticate any further requests
+	 * @throws ClientException On any communications error
+	 */
 	public OAuthCredentials getAuthenticationUrl() throws ClientException {
 		
 		HttpGet getTempToken = new HttpGet(TOKEN_URL);
@@ -87,9 +97,15 @@ public class OAuthFlow {
 			throw new ClientException(ex.getMessage());
 		}
 	}
-	
 
-	
+
+	/**
+	 * Returns the access token for the user
+	 * @param bean The OAuthCredentials retrieved from {@link #getAccessToken(OAuthCredentials, String)}
+	 * @param verifierCode The verification code the user has entered
+	 * @return The fully authenticated OAuthCredentials that are required for any further authenticated requests
+	 * @throws ClientException On any communications error
+	 */
 	public OAuthCredentials getAccessToken(OAuthCredentials bean, String verifierCode) throws ClientException {
 
 		bean.verifierCode = verifierCode;

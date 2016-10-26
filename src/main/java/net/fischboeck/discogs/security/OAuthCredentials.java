@@ -16,20 +16,19 @@
 
 package net.fischboeck.discogs.security;
 
-
+/**
+ * Model class that is used in the {@link OAuthFlow} authentication mechanism
+ */
 public class OAuthCredentials {
 
 	 String tempToken;
 	 String verifierCode;
-	
-	 
+
 	 String authorizationUrl;
 	 String accessToken;
 	 String sharedSecret;
 	
-	 OAuthCredentials() {
-		 
-	 }
+	 OAuthCredentials() { }
 	 
 	 public OAuthCredentials(String accessToken, String sharedSecret) {
 		 this.accessToken = accessToken;
