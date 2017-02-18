@@ -16,15 +16,14 @@
 
 package net.fischboeck.discogs.model.release;
 
-import java.time.OffsetDateTime;
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import net.fischboeck.discogs.model.BaseRelease;
 import net.fischboeck.discogs.model.Image;
 import net.fischboeck.discogs.model.Track;
 import net.fischboeck.discogs.model.Video;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.OffsetDateTime;
+import java.util.List;
 
 public class Release extends BaseRelease {
 
@@ -78,9 +77,9 @@ public class Release extends BaseRelease {
 
 	@JsonProperty("released_formatted")
 	private String releasedFormatted;
-	
-	private List<String> series;
-	
+
+	private List<Series> series;
+
 	private String status;
 	
 	private List<Track> tracklist;
@@ -197,7 +196,7 @@ public class Release extends BaseRelease {
 		return resourceUrl;
 	}
 
-	public List<String> getSeries() {
+	public List<Series> getSeries() {
 		return series;
 	}
 
