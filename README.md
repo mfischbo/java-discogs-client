@@ -10,6 +10,9 @@ https://www.discogs.com/developers/#page:user-collection
 * Authorization using an access token
 * First draft for a OAuth authentication (not fully implemented)
 
+Please be aware that this library is still in early development. I try to keep the public API
+of the client as small and stable as possible but things might change until the client is considered 
+being feature complete.
 
 ### Usage
 The main entry point is the class _DiscogsClient_ that provides access to API operations as well as authentication.
@@ -18,23 +21,20 @@ Example:
 ```java
 // Create a client without any authentication
 DisogsClient client = new DiscogsClient();
-
-// Create a client with token authentication
-DisogsClient client = new DiscogsClient(token);
-
-// Create a client with username, password authentication
-DiscogsClient client = new DiscogsClient(username, password);
 ```
 
 The different API's are accessible through _Operations_. These can be retrieved
 using the following calls:
 
 ```java
+// Create a new authorization strategy that should be used with the operation.
+AuthorizationStrategy auth = new TokenAuthenticationStrategy("my-secret-api-token");
+
 // To get access to the database API
-DatabaseOperations dbOps = client.getDatabaseOperations();
+DatabaseOperations dbOps = client.getDatabaseOperations(auth);
 
 // To get access to the user collection API
-UserCollectionOperations userOps = client.getUserCollectionOperations();
+UserCollectionOperations userOps = client.getUserCollectionOperations(auth);
 ```
 
 ### OAuth authentication
