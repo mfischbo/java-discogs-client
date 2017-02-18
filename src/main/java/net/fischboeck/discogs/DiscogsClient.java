@@ -33,7 +33,17 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class DiscogsClient {
+/**
+ * Facade class to access the underlying operations.
+ * This is the entry point and the class you want to use in order to access the API.
+ * The class provides getters for different types of operations. Currently implemented are:
+ * <ul>
+ *     <li>{@link DatabaseOperations} to retrieve basic data such as artists, releases, master releases and labels</li>
+ *     <li>{@link UserCollectionOperations} to modify a users collection (requires authentication)</li>
+ *     <li>{@link UserOperations} to gain access to any user specific data</li>
+ * </ul>
+ */
+public final class DiscogsClient {
 
 	private CloseableHttpClient httpClient;
 	private ObjectMapper mapper;

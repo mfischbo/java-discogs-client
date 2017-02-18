@@ -22,7 +22,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpUriRequest;
 
 /**
- * Created by foobox on 03.10.16.
+ * Implementation of {@link AuthorizationStrategy} that utilizes the OAuth authentication flow.
  */
 public class OAuthAuthorizationStrategy implements AuthorizationStrategy {
 

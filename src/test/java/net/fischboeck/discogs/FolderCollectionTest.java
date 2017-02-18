@@ -16,22 +16,18 @@
 
 package net.fischboeck.discogs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
-
 import net.fischboeck.discogs.commands.CreateFolderCommand;
 import net.fischboeck.discogs.commands.UpdateFolderCommand;
 import net.fischboeck.discogs.model.Page;
 import net.fischboeck.discogs.model.collection.CollectionRelease;
 import net.fischboeck.discogs.model.collection.CollectionValue;
 import net.fischboeck.discogs.model.collection.Folder;
-
 import org.junit.Test;
+
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.*;
 
 public class FolderCollectionTest extends AbstractClientTest {
 
@@ -66,31 +62,39 @@ public class FolderCollectionTest extends AbstractClientTest {
 	@Test
 	public void canUpdateFolderByUsername() throws Exception {
 		
-		String randomName = UUID.randomUUID().toString();
-		
-		UpdateFolderCommand uc = new UpdateFolderCommand(UPDATE_LIST_ID, randomName);
-		Folder f = this.userCollectionOps.updateFolder(testUsername, uc);
+		final String randomName = UUID.randomUUID().toString();
+		final String randomNewName = UUID.randomUUID().toString();
+
+		CreateFolderCommand cf = new CreateFolderCommand(randomName);
+		Folder f = this.userCollectionOps.createFolder(testUsername, cf);
+
 		assertNotNull(f);
-		assertEquals(randomName, f.getName());
+		assertEquals(f.getName(), cf.getName());
+
+		UpdateFolderCommand uc = new UpdateFolderCommand(f.getId(), randomNewName);
+		Folder f2 = this.userCollectionOps.updateFolder(testUsername, uc);
+		assertNotNull(f2);
+		assertEquals(randomNewName, f2.getName());
+
+		// cleanup
+		this.userCollectionOps.deleteFolder(testUsername, f2.getId());
 	}
 	
 	
 	@Test
 	public void canDeleteFolderByUsernameAndId() throws Exception {
-		
+
+		final String folderName = UUID.randomUUID().toString();
+
+		CreateFolderCommand cf = new CreateFolderCommand(folderName);
+		Folder f = this.userCollectionOps.createFolder(testUsername, cf);
+
 		List<Folder> folders = this.userCollectionOps.getFoldersByUser(testUsername);
 		assertTrue(folders.size() > 2);
 		
-		// find the first folder that does not have id 0 or 1 or UPDATE_LIST_ID
-		Iterator<Folder> fit = folders.iterator();
-		while (fit.hasNext()) {
-			Folder f = fit.next();
-			if (f.getId() == 0L || f.getId() == 1L || f.getId() != UPDATE_LIST_ID)
-				fit.remove();
-		}
-		
-		Folder f = folders.get(0);
 		this.userCollectionOps.deleteFolder(testUsername, f.getId());
+		List<Folder> folders2 = this.userCollectionOps.getFoldersByUser(testUsername);
+		assertTrue(folders.size() == (folders2.size() + 1));
 	}
 	
 	

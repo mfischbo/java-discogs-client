@@ -33,6 +33,12 @@ public class ReleaseTest extends AbstractClientTest {
 		Release r = dbOps.getRelease(28813);
 		assertNotNull(r);
 	}
+
+	@Test
+	public void canRetrieveRelease_2() throws Exception {
+		Release r = dbOps.getRelease(1457086);
+		assertNotNull(r);
+	}
 	
 
 	@Test

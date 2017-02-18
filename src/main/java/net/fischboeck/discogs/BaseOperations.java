@@ -36,6 +36,10 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Base implementation for all Operations classes.
+ * Provides common functionality for all Operations classes that implement specific portions of the API.
+ */
 class BaseOperations {
 
 	protected static final String DEFAULT_BASE_URL = "https://api.discogs.com";
@@ -182,14 +186,15 @@ class BaseOperations {
 
 		try {
 			response = this.httpClient.execute(request);
-			
+
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
 				response.close();
 				throw new EntityNotFoundException("API returned 404 on request GET " + request.getURI());
 			}
-			
+
 			return response;
-		
+		} catch (EntityNotFoundException enfEx) {
+			throw enfEx;
 		} catch (Exception ex) {
 			throw new ClientException(ex.getMessage());
 		}

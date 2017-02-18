@@ -22,18 +22,40 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpUriRequest;
 
 /**
- * Created by foobox on 03.10.16.
+ * {@link AuthorizationStrategy} that modifies a request to contain the username and password being used for accessing
+ * the API.
+ * The strategy appends username and password as AUTHORIZATION header in the HTTP request. Since the client strictly
+ * uses HTTPS transport security this implementation might be "secure enough" for some applications. For more details
+ * please see: https://www.discogs.com/developers/#page:authentication,header:authentication-discogs-auth-flow
  */
 public class UsernamePasswordAuthenticationStrategy implements AuthorizationStrategy {
 
+    /**
+     * The username to be sent with the request
+     */
     private String username;
+
+    /**
+     * The password to be sent with the request
+     */
     private String password;
 
+    /**
+     * Constructor specifying the username and password to be used for authentication
+     * @param username The username
+     * @param password The password for the specified username.
+     */
     public UsernamePasswordAuthenticationStrategy(String username, String password) {
         this.username = username;
         this.password = password;
     }
 
+
+    /**
+     * Modifies the HTTP request by appending the HTTP header 'AUTHORIZATION' with the specified username and password.
+     * @param request The HTTP request to be modified
+     * @return The modified HTTP request
+     */
     public HttpUriRequest authorize(HttpUriRequest request) {
         request.setHeader(HttpHeaders.AUTHORIZATION,
                 "Discogs key=" + this.username + ", secret=" + this.password);

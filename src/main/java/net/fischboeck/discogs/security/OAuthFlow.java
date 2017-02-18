@@ -33,7 +33,7 @@ import java.util.UUID;
  * This class implements a mechanism to authenticate an application agains the Discogs API
  * using the OAuth 1.0a protocol.
  * <br/><br/>
- * Authorization is done in the folowing steps:<br/>
+ * Authorization is done in the following steps:<br/>
  * Example:<br/><code>
  * DiscogsClient client = new DiscogsClient();
  * DiscogsOAuthFlow authFlow = client.getOAuthFlow(new OAuthVector(consumerKey, consumerSecret));

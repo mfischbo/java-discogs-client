@@ -53,5 +53,12 @@ public class AbstractClientTest {
 		DiscogsClient client = new DiscogsClient();
 		this.dbOps = client.getDatabaseOperations(this.strategy);
 		this.userCollectionOps = client.getUserCollectionOperations(this.strategy);
+
+		// don't stress the api
+		try {
+			Thread.sleep(1000L);
+		} catch (Exception ex) {
+			// noop
+		}
 	}
 }

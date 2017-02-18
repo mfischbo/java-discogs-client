@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Provides API access to all operations regarding a users collection.
  */
-class UserCollectionOperations extends BaseOperations {
+public final class UserCollectionOperations extends BaseOperations {
 
 
 	/**
@@ -52,7 +52,7 @@ class UserCollectionOperations extends BaseOperations {
 	 * @return List containing {@link Folder}s
 	 * @throws ClientException ON any communications error
 	 */
-	List<Folder> getFoldersByUser(String username) throws ClientException {
+	public List<Folder> getFoldersByUser(String username) throws ClientException {
 		
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(NamedCollection.class, Folder.class);
@@ -70,7 +70,7 @@ class UserCollectionOperations extends BaseOperations {
 	 * @return The folder that has been created
 	 * @throws ClientException On any communications error
 	 */
-	Folder createFolder(String username, CreateFolderCommand command) throws ClientException {
+	public Folder createFolder(String username, CreateFolderCommand command) throws ClientException {
 
 		return doPostRequest(fromTokens("/users/", username, "/collection/folders"),
 				command, Folder.class);
@@ -84,7 +84,7 @@ class UserCollectionOperations extends BaseOperations {
 	 * @return The updated folder
 	 * @throws ClientException On any communications error
 	 */
-	Folder updateFolder(String username, UpdateFolderCommand command) throws ClientException {
+	public Folder updateFolder(String username, UpdateFolderCommand command) throws ClientException {
 		
 		return doPostRequest(fromTokens("/users/", username, "/collection/folders/", command.getId()),
 				command, Folder.class);
@@ -97,7 +97,7 @@ class UserCollectionOperations extends BaseOperations {
 	 * @param folderId The id of the folder to be removed
 	 * @throws ClientException On any communications error
 	 */
-	void deleteFolder(String username, long folderId) throws ClientException {
+	public void deleteFolder(String username, long folderId) throws ClientException {
 		
 		doDeleteRequest(fromTokens("/users/", username, "/collection/folders/", folderId));
 	}
@@ -110,7 +110,7 @@ class UserCollectionOperations extends BaseOperations {
 	 * @return The folder
 	 * @throws ClientException On any communications error
 	 */
-	Folder getFolderByUsernameAndId(String username, long id) throws ClientException {
+	public Folder getFolderByUsernameAndId(String username, long id) throws ClientException {
 		
 		return doGetRequest(
 				fromTokens("/users/", username, "/collection/folders/", id),
@@ -125,7 +125,7 @@ class UserCollectionOperations extends BaseOperations {
 	 * @return A list of {@link CollectionRelease}s for the given username and id
 	 * @throws ClientException On any communications error
 	 */
-	Page<CollectionRelease> getCollectionReleasesByUsernameAndId(String username, long releaseId) throws ClientException {
+	public Page<CollectionRelease> getCollectionReleasesByUsernameAndId(String username, long releaseId) throws ClientException {
 
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(Page.class, CollectionRelease.class);
@@ -143,7 +143,8 @@ class UserCollectionOperations extends BaseOperations {
 	 * @return A Page of {@link CollectionRelease}s
 	 * @throws ClientException On any communications error
 	 */
-	Page<CollectionRelease> getCollectionReleasesByFolderId(String username, long folderId, PageRequest page) throws ClientException {
+	public Page<CollectionRelease> getCollectionReleasesByFolderId(String username, long folderId, PageRequest page)
+			throws ClientException {
 		
 		JavaType t = mapper.getTypeFactory()
 				.constructParametricType(Page.class, CollectionRelease.class);
@@ -158,7 +159,7 @@ class UserCollectionOperations extends BaseOperations {
 	 * @return The value of the collection
 	 * @throws ClientException On any communications error
 	 */
-	CollectionValue getCollectionValue(String username) throws ClientException {
+	public CollectionValue getCollectionValue(String username) throws ClientException {
 		
 		return doGetRequest(fromTokens("/users/", username, "/collection/value"),
 				CollectionValue.class);

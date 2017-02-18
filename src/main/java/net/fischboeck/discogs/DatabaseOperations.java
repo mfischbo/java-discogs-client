@@ -1,3 +1,18 @@
+//
+//  Copyright 2016 M. Fischboeck
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 package net.fischboeck.discogs;
 
 import com.fasterxml.jackson.databind.JavaType;
@@ -16,6 +31,10 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+/**
+ * Operations implementation to access the database API methods.
+ * https://www.discogs.com/developers/#page:database
+ */
 final public class DatabaseOperations extends BaseOperations {
 
 	public enum QueryParam {
@@ -89,10 +108,10 @@ final public class DatabaseOperations extends BaseOperations {
 
 
 	/**
-	 * 
-	 * @param releaseId
-	 * @param username
-	 * @return
+	 * Returns the {@link UserReleaseRating} for the specified user and release
+	 * @param releaseId The id of the {@link Release} to retrieve the rating for
+	 * @param username The name of the user to retrieve the rating for
+	 * @return The {@link UserReleaseRating}
 	 * @throws ClientException
 	 */
 	public UserReleaseRating getUserReleaseRating(long releaseId, String username) throws ClientException {
@@ -148,10 +167,10 @@ final public class DatabaseOperations extends BaseOperations {
 	
 
 	/**
-	 * 
-	 * @param id
-	 * @return
-	 * @throws ClientException
+	 * Returns the {@link Artist} for the specified id
+	 * @param id The id of the artist
+	 * @return The {@link Artist} or <code>null</code> if no such artist exists
+	 * @throws ClientException On any unexpected error
 	 */
 	public Artist getArtist(long id) throws ClientException {
 		
@@ -160,11 +179,11 @@ final public class DatabaseOperations extends BaseOperations {
 
 	
 	/**
-	 * 
-	 * @param artistId
-	 * @param page
-	 * @return
-	 * @throws ClientException
+	 * Returns a {@link Page} of {@link SimpleRelease}s for the specified artist
+	 * @param artistId The id of the artist to return the {@link SimpleRelease}s for
+	 * @param page The paging parameters
+	 * @return The page of releases
+	 * @throws ClientException On any client error
 	 */
 	public Page<SimpleRelease> getArtistReleases(long artistId, PageRequest page) throws ClientException {
 
@@ -176,10 +195,10 @@ final public class DatabaseOperations extends BaseOperations {
 	
 
 	/**
-	 * 
-	 * @param id
-	 * @return
-	 * @throws ClientException
+	 * Returns the {@link Label} for the specified id
+	 * @param id The id of the {@link Label}
+	 * @return The {@link Label} or <code>null</code> if no such label exists
+	 * @throws ClientException On any client error
 	 */
 	public Label getLabel(long id) throws ClientException {
 		
@@ -188,11 +207,11 @@ final public class DatabaseOperations extends BaseOperations {
 	
 
 	/**
-	 * 
-	 * @param labelId
-	 * @param page
-	 * @return
-	 * @throws ClientException
+	 * Returns a list of a labels releases
+	 * @param labelId The id of the label to return releases for
+	 * @param page The paging parameters
+	 * @return A page of {@link SimpleRelease}
+	 * @throws ClientException On any client error
 	 */
 	public Page<SimpleRelease> getLabelReleases(long labelId, PageRequest page) throws ClientException {
 		
@@ -209,11 +228,12 @@ final public class DatabaseOperations extends BaseOperations {
 
 
 	/**
-	 * 
-	 * @param query
-	 * @param page
-	 * @param params
-	 * @return
+	 * Returns a {@link SearchResult} for the given parameters.
+	 * Note that this operation is only available with an authenticated client
+	 * @param query The search query to look up
+	 * @param page The paging parameters
+	 * @param params The type of fields to look for
+	 * @return A {@link SearchResult}
 	 * @throws ClientException
 	 */
 	public SearchResult search(String query, PageRequest page, QueryParam ... params) throws ClientException {

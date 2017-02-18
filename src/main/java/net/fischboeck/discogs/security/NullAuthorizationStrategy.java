@@ -21,9 +21,15 @@ package net.fischboeck.discogs.security;
 import org.apache.http.client.methods.HttpUriRequest;
 
 /**
- * Interface that provides a method to authenticate an {@link HttpUriRequest}.
+ * Implements a no op authorization strategy.
+ * This implementation simply returns the request without making any modifications, which results in an
+ * unauthenticated request.
+ *
+ * Created by M.Fischboeck on 03.10.16.
  */
-public interface AuthorizationStrategy {
+public class NullAuthorizationStrategy implements AuthorizationStrategy {
 
-    public HttpUriRequest authorize(HttpUriRequest request);
+    public HttpUriRequest authorize(HttpUriRequest request) {
+        return request;
+    }
 }
