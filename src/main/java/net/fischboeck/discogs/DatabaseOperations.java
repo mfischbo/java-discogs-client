@@ -17,6 +17,7 @@ package net.fischboeck.discogs;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.fischboeck.discogs.commands.UserReleaseRatingUpdateCommand;
 import net.fischboeck.discogs.model.Currency;
 import net.fischboeck.discogs.model.Page;
 import net.fischboeck.discogs.model.artist.Artist;
@@ -119,9 +120,18 @@ final public class DatabaseOperations extends BaseOperations {
 		return doGetRequest(fromTokens("/releases/", releaseId, "/rating/", username), 
 				UserReleaseRating.class);
 	}
-	
-	
-	public void updateUserReleaseRating(long releaseId, String username, int rating) throws ClientException {
+
+
+	/**
+	 * Updates the release rating for the specified release and user.
+	 * Note that this operation requires a valid authorization other than {@link NullAuthorizationStrategy}
+	 * @param releaseId The id of the release to update the rating for
+	 * @param username The username
+	 * @param rating The rating to be set
+	 * @return The result of the operation as {@link UserReleaseRating}
+	 * @throws ClientException On any unexpected error
+	 */
+	public UserReleaseRating updateUserReleaseRating(long releaseId, String username, int rating) throws ClientException {
 
 		if (authorizationStrategy == null || authorizationStrategy instanceof NullAuthorizationStrategy) {
 			throw new IllegalStateException("This operation requires an authenticated client.");
@@ -134,11 +144,21 @@ final public class DatabaseOperations extends BaseOperations {
 		if (username == null || username.isEmpty()) {
 			throw new IllegalArgumentException("A username is required for this operation");
 		}
-		
-		throw new ClientException("Not implemented yet");
+
+		UserReleaseRatingUpdateCommand command = new UserReleaseRatingUpdateCommand(releaseId, username, rating);
+
+		return doPutRequest(fromTokens("/releases/", releaseId, "/rating/", username),
+				command, UserReleaseRating.class);
 	}
 
-	
+
+	/**
+	 * Deletes the user release rating for the specified release and user.
+	 * Note that this request requires a valid authentication other than {@link NullAuthorizationStrategy}
+	 * @param releaseId The id of the release to remove the rating for
+	 * @param username The username
+	 * @throws ClientException On any unexpected error.
+	 */
 	public void deleteUserReleaseRating(long releaseId, String username) throws ClientException {
 		
 		if (authorizationStrategy == null || authorizationStrategy instanceof NullAuthorizationStrategy) {
@@ -149,7 +169,7 @@ final public class DatabaseOperations extends BaseOperations {
 			throw new IllegalArgumentException("A username is required for this operation");
 		}
 	
-		throw new ClientException("Not implemented yet");
+		doDeleteRequest(fromTokens("/releases/", releaseId, "/rating/", username));
 	}
 	
 
@@ -219,10 +239,15 @@ final public class DatabaseOperations extends BaseOperations {
 				.constructParametricType(Page.class, SimpleRelease.class);
 		return doGetRequest(fromTokensAndPage(page, "/labels/", labelId, "/releases"), t);
 	}
-	
-	
-	public InputStream getImage(String url) {
-	
+
+
+	/**
+	 * Returns an input stream for a specified image url
+	 * @param url The url of the image
+	 * @return A {@link InputStream} to read the image data from
+	 * @throws ClientException On any unexpected client error
+	 */
+	public InputStream getImage(String url) throws ClientException {
 		return doImageRequest(url);
 	}
 

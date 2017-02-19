@@ -159,6 +159,28 @@ class BaseOperations {
 			closeSafe(response);
 		}
 	}
+
+	<T> T doPutRequest(String url, Object body, Class<T> type) throws ClientException {
+		log.debug("[doPutRequest] url={}", url);
+
+		CloseableHttpResponse response = null;
+
+		try {
+			HttpPut request = new HttpPut(url);
+			request.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(body), ContentType.APPLICATION_JSON));
+			response = doHttpRequest(request);
+			HttpEntity entity = response.getEntity();
+			return mapper.readValue(entity.getContent(), type);
+		} catch (JsonProcessingException jpe) {
+			throw new ClientException(jpe.getMessage());
+		} catch (IOException ioe) {
+			throw new ClientException(ioe.getMessage());
+		} catch (EntityNotFoundException enfe) {
+			return null;
+		} finally {
+			closeSafe(response);
+		}
+	}
 	
 	
 	void doDeleteRequest(String url) {
@@ -201,17 +223,20 @@ class BaseOperations {
 	}
 	
 	
-	InputStream doImageRequest(String url) {
+	InputStream doImageRequest(String url) throws ClientException {
 		
 		HttpGet request = new HttpGet(url);
 		request.addHeader(HttpHeaders.ACCEPT, "image/png,image/jpeg");
 		try {
 			CloseableHttpResponse response = this.httpClient.execute(request);
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+				throw new EntityNotFoundException("API returned 404 on request GET " + url);
+			}
 			return response.getEntity().getContent();
 		} catch (Exception ex) {
 			log.error("[doImageRequest] Caught exception fetching the image. Cause {}", ex.getMessage());
+			throw new ClientException(ex.getMessage());
 		}
-		return null;
 	}
 
 	

@@ -27,6 +27,8 @@ import static org.junit.Assert.assertNotNull;
 
 public class ReleaseTest extends AbstractClientTest {
 
+	static final int RELEASE_ID = 298776;
+
 	@Test
 	public void canRetrieveRelease() throws Exception {
 		
@@ -64,5 +66,16 @@ public class ReleaseTest extends AbstractClientTest {
 		assertNotNull(rating);
 		assertEquals(335195, rating.getReleaseId());
 		assertEquals("a.paul", rating.getUsername());
+	}
+
+
+	@Test
+	public void canUpdateAndDeleteUserReleaseRating() throws Exception {
+
+		UserReleaseRating rating = dbOps.updateUserReleaseRating(RELEASE_ID, testUsername, 5);
+		assertNotNull(rating);
+
+		// delete the rating. Must not throw an exception
+		dbOps.deleteUserReleaseRating(RELEASE_ID, this.testUsername);
 	}
 }
