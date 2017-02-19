@@ -32,6 +32,7 @@ public class AbstractClientTest {
 
 	protected DatabaseOperations dbOps;
 	protected UserCollectionOperations userCollectionOps;
+	protected UserOperations userOps;
 
 	public AbstractClientTest() {
 		try {
@@ -53,6 +54,7 @@ public class AbstractClientTest {
 		DiscogsClient client = new DiscogsClient();
 		this.dbOps = client.getDatabaseOperations(this.strategy);
 		this.userCollectionOps = client.getUserCollectionOperations(this.strategy);
+		this.userOps = client.getUserOperations(this.strategy);
 
 		// don't stress the api
 		try {
