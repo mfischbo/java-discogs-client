@@ -38,12 +38,15 @@ public class Track {
 	private String type;
 	
 	private String title;
+	
+	@JsonProperty("sub_tracks")
+	private List<Track> subTracks;
 
 	@JsonProperty("extraartists")
 	private List<ReleaseArtist> extraArtists;
 	
 	private List<ReleaseArtist> artists;
-
+	
 	/**
 	 * Returns the duration of the track in the notation "mm:ss"
 	 * @return The duration of the track
@@ -92,5 +95,9 @@ public class Track {
 		return "Track [duration=" + duration + ", position=" + position
 				+ ", type=" + type + ", title=" + title + ", extraArtists="
 				+ extraArtists + "]";
+	}
+	
+	public List<Track> getSubTracks() {
+		return subTracks;
 	}
 }
