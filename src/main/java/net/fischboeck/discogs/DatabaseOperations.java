@@ -58,10 +58,10 @@ final public class DatabaseOperations extends BaseOperations {
 	 */
 	public MasterRelease getMasterRelease(long id) throws ClientException {
 
-		StringBuilder urlBuilder = new StringBuilder(DEFAULT_BASE_URL)
-			.append("/masters/")
-			.append(id);
-		return doGetRequest(urlBuilder.toString(), MasterRelease.class);
+		String urlBuilder = DEFAULT_BASE_URL +
+				"/masters/" +
+				id;
+		return doGetRequest(urlBuilder, MasterRelease.class);
 	}
 
 	/**
@@ -103,8 +103,7 @@ final public class DatabaseOperations extends BaseOperations {
 		
 		JavaType t = mapper.getTypeFactory()
 			.constructParametricType(Page.class, Version.class);
-		Page<Version> retval = doGetRequest(fromTokensAndPage(page, "/masters/", id, "/versions"), t);
-		return retval;
+		return doGetRequest(fromTokensAndPage(page, "/masters/", id, "/versions"), t);
 	}
 
 
@@ -113,7 +112,7 @@ final public class DatabaseOperations extends BaseOperations {
 	 * @param releaseId The id of the {@link Release} to retrieve the rating for
 	 * @param username The name of the user to retrieve the rating for
 	 * @return The {@link UserReleaseRating}
-	 * @throws ClientException
+	 * @throws ClientException On any unexpected error
 	 */
 	public UserReleaseRating getUserReleaseRating(long releaseId, String username) throws ClientException {
 	
@@ -157,9 +156,10 @@ final public class DatabaseOperations extends BaseOperations {
 	 * Note that this request requires a valid authentication other than {@link NullAuthorizationStrategy}
 	 * @param releaseId The id of the release to remove the rating for
 	 * @param username The username
-	 * @throws ClientException On any unexpected error.
+	 * @throws IllegalStateException If the client is not authenticated
+	 * @throws IllegalArgumentException If the username is empty or {@code null}.
 	 */
-	public void deleteUserReleaseRating(long releaseId, String username) throws ClientException {
+	public void deleteUserReleaseRating(long releaseId, String username) {
 		
 		if (authorizationStrategy == null || authorizationStrategy instanceof NullAuthorizationStrategy) {
 			throw new IllegalStateException("This operation requires an authenticated client");
@@ -259,7 +259,7 @@ final public class DatabaseOperations extends BaseOperations {
 	 * @param page The paging parameters
 	 * @param params The type of fields to look for
 	 * @return A {@link SearchResult}
-	 * @throws ClientException
+	 * @throws ClientException On any unexpected error
 	 */
 	public SearchResult search(String query, PageRequest page, QueryParam ... params) throws ClientException {
 
@@ -282,7 +282,7 @@ final public class DatabaseOperations extends BaseOperations {
 		try {
 			uriBuilder.append(URLEncoder.encode(query, "UTF-8"));
 		} catch (UnsupportedEncodingException ex) {
-			
+			throw new ClientException("Failed to encode the query string. Unsupported encoding UTF-8");
 		}
 		
 		if (params.length > 0) {
@@ -294,7 +294,6 @@ final public class DatabaseOperations extends BaseOperations {
 			uriBuilder.deleteCharAt(uriBuilder.length()-1);
 		}
 	
-		SearchResult retval = doGetRequest(uriBuilder.toString(), SearchResult.class);
-		return retval;
+		return doGetRequest(uriBuilder.toString(), SearchResult.class);
 	}
 }
