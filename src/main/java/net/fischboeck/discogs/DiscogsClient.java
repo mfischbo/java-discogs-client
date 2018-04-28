@@ -16,6 +16,7 @@
 
 package net.fischboeck.discogs;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.fischboeck.discogs.security.AuthorizationStrategy;
@@ -23,10 +24,12 @@ import net.fischboeck.discogs.security.OAuthFlow;
 import net.fischboeck.discogs.security.OAuthVector;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 
 import java.util.Collection;
@@ -45,6 +48,8 @@ import java.util.Set;
  */
 public final class DiscogsClient {
 
+	private static final int REQUEST_TIMEOUT = 30;
+
 	private CloseableHttpClient httpClient;
 	private ObjectMapper mapper;
 
@@ -58,11 +63,17 @@ public final class DiscogsClient {
 
 	private void init() {
 		HttpClientBuilder builder = HttpClients.custom();
+		RequestConfig requestConfig = RequestConfig.custom()
+				.setConnectionRequestTimeout(REQUEST_TIMEOUT)
+				.build();
+
 		this.httpClient = builder.setDefaultHeaders(this.getDefaultHeaders())
-			.build();
-		
+				.setDefaultRequestConfig(requestConfig)
+				.build();
+
 		this.mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
+		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 	}
 	
 	
@@ -80,7 +91,7 @@ public final class DiscogsClient {
 
 	/**
 	 * Returns a new {@link DatabaseOperations} client
-	 * @return
+	 * @return A operations client for database operations
 	 */
 	public DatabaseOperations getDatabaseOperations(AuthorizationStrategy strategy) {
 		return new DatabaseOperations(httpClient, mapper, strategy);
@@ -97,7 +108,7 @@ public final class DiscogsClient {
 	/**
 	 * Returns the {@link UserOperations} client
 	 * @param strategy The {@link AuthorizationStrategy} to be used to authenticate against the API
-	 * @return The client
+	 * @return The client for user operations
 	 */
 	public UserOperations getUserOperations(AuthorizationStrategy strategy) {
 		return new UserOperations(httpClient, mapper, strategy);
