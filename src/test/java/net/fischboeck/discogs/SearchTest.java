@@ -22,12 +22,6 @@ import org.junit.Test;
 
 public class SearchTest extends AbstractClientTest {
 
-	@Test(expected = IllegalStateException.class)
-	public void failsSearchOnUnauthenticatedClient() throws Exception {
-		
-		dbOps.search("Pete Rock", null, QueryParam.artist);
-	}
-	
 	@Test(expected = IllegalArgumentException.class)
 	public void failsOnMissingQueryString() throws Exception {
 		
