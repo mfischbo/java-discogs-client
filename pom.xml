@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.fischboeck.discogs</groupId>
   <artifactId>discogs-api</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>Discogs API Client</name>
   <description>Java client for the discogs.com API</description>
 
